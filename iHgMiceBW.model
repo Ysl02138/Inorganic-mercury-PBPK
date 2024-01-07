@@ -1,0 +1,389 @@
+#------------------------------------------------------------------------------
+# iHg.model --- dynamic body weight (study-specific) and first order GI absorption
+# Version 2.0  --- set up State variables to zero in the Initial section
+#   
+# Author: YL, FB, NH, Updated: Jan 7, 2024
+#------------------------------------------------------------------------------
+# STATE VARIABLES for the model (for which ODEs are provided).
+
+States = {AGI,          # ... gut tissue (ug)
+          A_in,         # ... total intake (ug)
+          AL,           # ... liver (ug)
+          AK,           # ... kidney (ug)
+          ABrn,         # ... brain (ug)
+          ARest,        # ... rest of the body (ug)
+          
+          AUCCBld,      # AUC of iHg in blood (ug*hr/L)          
+          AUCCL,        # AUC of iHg in liver (ug*hr/L)
+          AUCCK,        # AUC of iHg in kidney (ug*hr/L)
+          AUCCRest,     # AUC of iHg in carcass (ug*hr/L)
+          AUCCBrn,      # AUC of iHg in brain (ug*hr/L) 
+          AunabsGI,     # Unabsorbed iHg  (ug)
+          AabsGI,       # Absorbed iHg by GI  (ug)
+          Afeces_bile,  # Amount excreted via fecal elimination (ug)
+          ABldug,       # Amount of iHg in blood
+          ABrnExcrug,   # Amount excreted via active brain excretion (ug)
+          Aurineug,     # Amount excreted via urinary elimination (ug)
+          Afecesug};    # Amount excreted via fecal elimination, both absorbed and unabsorbed (ug)
+
+
+# End of STATE VARIABLES.
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+# OUTPUT VARIABLES for the model (which can be obtained at any point in time
+# as analytic functions of state variables, inputs, and parameters).
+
+
+Outputs = { 
+  CL,          # ug/kg, conc. of Hg in the tissue of liver
+  CVL,         # ug/L, conc. of Hg in the venous blood of liver
+  CK,          # ug/kg, conc. of Hg  in the kidney 
+  CVK,         # ug/L, conc. of Hg  in the venous of the kidney
+  CBrn,        # ug/kg, conc. of Hg in the tissue of brain
+  CVBrn,       # ug/L, conc. of Hg in the venous blood of brain
+  CRest,       # ug/kg, Hg  conc. in the Rest of body (ug/L)
+  CVRest,      # ug/L, Hg  conc. in the venous blood of carcass (Rest of body)
+  CBld,        # ug/L, concentration of Hg  in the blood
+  CLU,         # ug/g, conc. of Hg in the tissue of liver
+  CVLU,        # ug/mL, conc. of Hg in the venous blood of liver
+  CKU,         # ug/g, conc. of Hg  in the kidney 
+  CVKU,        # ug/mL, conc. of Hg  in the venous of the kidney
+  CBrnU,       # ug/g, conc. of Hg in the tissue of brain
+  CVBrnU,      # ug/mL, conc. of Hg in the venous blood of brain
+  CRestU,      # ug/g, Hg  conc. in the Rest of body (ug/mL)
+  CVRestU,     # ug/mL, Hg  conc. in the venous blood of carcass (Rest of body)
+  CBldU,       # ug/mL, concentration of Hg  in the blood
+
+  BW,          # body weight, kg
+  QC,          # cardiac flow, L/hr  
+  QL,          # blood flow to liver, L/hr
+  QK,          # blood flow to kidney, L/hr
+  QBrn,        # blood flow to brain, L/hr
+  QRest,       # blood flow to carcass (rest of the body), L/hr
+  
+  VL,          # volume of  liver, L
+  VK,          # volume of  kidney, L
+  VBrn,        # volume of  liver, L
+  VBld,        # volume of  kidney, L
+  VRest,       # volume of  carcass (rest of the body)
+  
+  Kabs,        # 1/hr, absorption
+  Kunabs,      # 1/hr, Fecal excretion rate of unabsorbed dose from GI
+  Kbile,       # 1/hr, Bile elimination rate into feces  
+  Kurine,      # 1/hr, Rate of urine elimination 
+  Kbrn,        # 1/hr, loss of inorganic Hg from brain, Clewell, 1999
+  
+  RabsGI,      # ug/hr, rate for Hg to be absorbed from GI into liver   
+  KIV,         # ug/hr, rate of iHg exposure from IV injection
+  KGavage,     # ug/hr, rate of iHg exposure from oral gavage   
+  KDrink,      # ug/hr, rate of iHg exposure from drinking water  
+  TotTissue,   # ug, AK + AL +  ARest + ABrn  + ABld +AGI
+  TotTissueIn, # ug, AK + AL +  ARest + ABrn  + ABld
+  
+  Loss,       # Aurine + Afeces; #ug
+  ABld,       # Amount in blood (plasma) (ug)
+  Aurine,     # Amount excreted via urinary elimination (ug)
+  ABrnExcr,   # Amount excreted via brain excretion (ug)
+  Afeces,     # Amount excreted via feces
+  Qbal,       # flow balance;
+  Vbal,       # volume balance;
+  BalanceCheck# mass balance;
+};  
+
+# End of OUTPUT VARIABLES.
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+# INPUT VARIABLES for the model (which are independent of other variables, and
+# which may vary in time).
+
+Inputs = {
+  PDose,         # gavage (ug/kg/day)
+  expowk,        # days/week
+  expodur,       # weeks 
+  Drink,         # drinking water dose (ug/kg/day) 
+  IVDose         # IV (ug Hg/kg) 
+};      
+
+# End of INPUT VARIABLES.
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# PARAMETERS for the model (which are independent of time).
+
+# chemical properties of Hg
+MW     =  200;     # g/mol, Hg contents of Hg  molecular mass
+
+# Partition coefficients and absorption/excretion parameters
+lnPLC	=	1.778 ;    # scale constant for partition coefficient of liver-blood, logged
+lnPKC	=	3.219	;      # scale constant for partition coefficient of kidney-blood, logged
+lnPBrnC	=	-0.278	;  # scale constant for partition coefficient of brain-blood, logged
+lnPRestC =	0.086 ; # scale constant for partition coefficient of carcass (rest of the body)-blood, logged
+
+lnKabsC	=	-3.411	;        # scale constant for iHg absorption from GI to liver, logged 
+lnKunabsC	=	-0.821	;      # scale constant for iHg elimination of unabsorbed from GI, loggd 
+lnKbileC	=		-0.562;       # scale constant for iHg elimination of absorbed iHg from liver via bile,  logged 
+lnKurineC	=		-2.526;     # scale constant for iHg elimination of absorbed iHg from kidney via urine,  logged 
+lnKbrnC	=	-3.381;          # scale constant for iHg elimination from brain, logged
+
+# partition coefficients (unitless); initial setting and update later
+PL     =  1;    # Liver/blood PC 
+
+PK     =  1;    # Kidney/blood PC 
+PBrn   =  1;    # Brain/blood PC 
+PRest  =  1;    # Rest of body/blood PC
+
+# Blood flow rates to compartments as fraction of cardiac output
+QCC =  16.5;     #L/hr/kg^0.75, Cardiac output (Brown 1997, Forsyth 1968)
+QLC =  0.161;     #Fraction blood flow to liver (Brown 1997, Fisher 2000)
+QKC =  0.091;     #Fraction blood flow to kidney (Brown 1997, Forsyth 1968)
+QBrnC =  0.033;  #Fraction blood flow to brain  (Brown 1997; Davies, 1993)
+
+# volume of compartments as fraction of body weight
+VLC =  0.055 ;    #Fractional liver tissue  (Brown 1997; Davies, 1993)
+VKC =  0.017 ;   #Fractional kidney tissue  (Brown 1997; Davies, 1993)
+VBrnC =  0.017 ;  #Fractional brain tissue  (Brown 1997; Davies, 1993)
+VBldC =  0.049 ;  #Fractional blood (Brown 1997; Davies, 1993)
+
+# End of PARAMETERS.
+#------------------------------------------------------------------------------
+BW0 = 0.025;       # baseline body weight, kg
+sex=1;          # 1= male, 2= female
+BWgrowth=0;     # body growth, 1= yes, 0= no 
+Growthrate =0;  # study-specific body growth, hg/hr
+expowk = 0;     # exposure hours (hrs/wk)
+expodur = 0;    # exposure duration (hrs/whole study period)
+PDose = 0.0;    # Gavage (ug/kg/day)
+Drink = 0.0;   	# Drinking water dose (ug/kg/day)
+IVDose = 0.0;   # Drinking water dose (ug/kg)
+TChng 	= 0.05;	# IV infusion/gavage duration (hour); TCE TChng 	= 0.003;	Chiu 2014
+
+#-----------------------------------------------------------------------
+#          Population mean for model parameters
+#-----------------------------------------------------------------------
+
+M_lnPLC = 1.0;
+M_lnPKC = 1.0;
+M_lnPBrnC = 1.0;
+M_lnPRestC = 1.0;
+
+M_lnKabsC = 1.0;
+M_lnKunabsC = 1.0;
+M_lnKbileC = 1.0;
+M_lnKurineC = 1.0;
+M_lnKbrnC = 1.0;
+
+
+#-----------------------------------------------------------------------
+#          variances for model parameters
+#-----------------------------------------------------------------------
+
+V_lnPLC = 1.0;
+V_lnPKC = 1.0;
+V_lnPBrnC = 1.0;
+V_lnPRestC = 1.0;
+
+V_lnKabsC = 1.0;
+V_lnKunabsC = 1.0;
+V_lnKbileC= 1.0;
+V_lnKurineC = 1.0;
+V_lnKbrnC = 1.0;
+
+
+#-----------------------------------------------------------------------
+#          Measurement error variances for output (Ve_...)
+#-----------------------------------------------------------------------
+Ve_Aurine =  1.0;
+Ve_Afeces= 1.0;
+Ve_ABrnExcr = 1.0;
+Ve_ABld =  1.0;
+Ve_CBldU = 1.0;
+Ve_CBrnU =  1.0;
+Ve_CKU =  1.0;
+Ve_CLU =  1.0;
+Ve = 1.0; #overall error variance
+
+#------------------------------------------------------------------------------
+# MODEL INITIALIZATION section.
+Initialize {
+  AGI = 0.0;           # ... gut tissue (ug)
+  A_in = 0.0;          # ... total intake (ug)
+  AL = 0.0;            # ... liver (ug)
+  AK = 0.0;            # ... kidney (ug)
+  ABrn = 0.0;          # ... brain (ug)
+  ARest = 0.0;         # ... rest of the body (ug)
+  
+  AUCCBld = 0.0;       # AUC of iHg in blood (ug*hr/L)          
+  AUCCL = 0.0;         # AUC of iHg in liver (ug*hr/L)
+  AUCCK = 0.0;         # AUC of iHg in kidney (ug*hr/L)
+  AUCCRest = 0.0;      # AUC of iHg in carcass (ug*hr/L)
+  AUCCBrn = 0.0;       # AUC of iHg in brain (ug*hr/L) 
+  AunabsGI = 0.0;      # Unabsorbed iHg  (ug)
+  AabsGI = 0.0;        # Absorbed iHg by GI  (ug)
+  Afeces_bile = 0.0;   # Amount excreted via fecal elimination (ug)
+  ABldug = 0.0;        # Amount of iHg in blood
+  ABrnExcrug = 0.0;    # Amount excreted via active brain excretion (ug)
+  Aurineug = 0.0;      # Amount excreted via urinary elimination (ug)
+  Afecesug = 0.0;      # Amount excreted via fecal elimination (ug)
+  
+  # partition coefficients   
+  PL	=	exp(lnPLC);
+  PK	=	exp(lnPKC);
+  PBrn	=	exp(lnPBrnC);
+  PRest	=	exp(lnPRestC);
+  
+}
+# End of MODEL INITIALIZATION.
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# DYNAMICS section.
+Dynamics {
+  
+   BW =     (BWgrowth == 0 ? BW0 : BW0 + (t * Growthrate)); #time-dependent body weight, kg
+
+   Kabs   = (exp(lnKabsC)/pow(BW,(0.25)))/24.0;       # 1/hr, Absorption rate from GI to liver  
+   Kunabs = (exp(lnKunabsC)/pow(BW,(0.25)))/24.0;     # 1/hr, fecal elimination of unabsorbed Hg in the GI
+   
+   Kbile  = (exp(lnKbileC)/pow(BW,(0.25)))/24.0;      # 1/hr, Bile elimination, liver to feces storage
+   Kurine = (exp(lnKurineC)/pow(BW,(0.25)))/24.0;     # 1/hr, renal (filtrate) elimination through urine 
+   Kbrn  = (exp(lnKbrnC)/pow(BW,(0.25)))/24.0;        # 1/hr, active brain excretion             
+  
+   # Computed parameters based on BW
+   # Cardiac output and blood flows to compartments (L/hr)
+   QC = QCC*pow(BW, 0.75);   # L/hr, Cardiac output (adjusted for blood)
+   QL = QLC*QC;              # L/hr, blood flow to liver
+   QK = QKC*QC;              # L/hr, blood flow to kidney
+   QBrn = QBrnC*QC;          # L/hr, blood flow to brain
+   QRest = QC-QK-QL-QBrn;    # L/hr, blood flow to the Rest of body
+  
+  # Compartment volumes (L; assumed approx. equal to kg)
+   VL = VLC*BW;                        # kg, Liver
+   VK = VKC*BW;                        # kg, Kidney
+   VBld = VBldC*BW;                    # kg, blood
+   VBrn = VBrnC*BW;                    # kg, brain
+   VRest = (0.93*BW)-VK-VL-VBld-VBrn;  # kg, Rest of body 
+  
+   # Assign an initial value for each state.
+   KGavage = (BW * PDose *   expowk * expodur) / TChng;   # PO dose rate (into GI) (ug/hr)
+   KDrink = (Drink * BW * expowk * expodur) / 24.0;       # Ingestion rate via drinking water (mg/hr) ## Oral route
+   KIV = (IVDose * BW * expowk * expodur) / TChng;        # IV infusion rate (ug/hr)
+
+   # Gastrointestinal (GI) tract
+   RGI = KGavage + KDrink -(Kabs*AGI) -(Kunabs*AGI); # ug/hr, Rate of Hg  changed in the GI
+   dt(AGI) = RGI;                                    # ug, Amount of Hg remained in the GI 
+   RabsGI = Kabs*AGI;                                # rate for Hg to be absorbed from GI to liver,ug/h,    
+   dt(AabsGI) = RabsGI;                              # ug, Amount of absorbed Hg 
+   RunabsGI = Kunabs*AGI;                            # rate of unabsorbed eliminated to feces, ug/h 
+   dt(AunabsGI) = RunabsGI;                          # ug, Amount of unabsorbed eliminated to feceds, Hg 
+
+   # Time-varying outputs.
+   CL = AL/(VL);              # ug/kg, conc. of Hg in the tissue of liver
+   CVL = CL/(PL);             # ug/kg, conc. of Hg in the venous blood of liver
+   CK = AK/(VK);              # ug/kg, conc. of Hg  in the kidney 
+   CVK = CK/(PK);             # ug/kg, conc. of Hg  in the venous of the kidney
+   CBrn= ABrn/(VBrn);         # ug/kg, conc. of Hg in the tissue of brain
+   CVBrn = CBrn /(PBrn);      # ug/kg, conc. of Hg in the venous blood of brain
+   CRest = ARest/(VRest);     # ug/kg, Hg  conc. in the Rest of body (ug/kg)
+   CVRest = CRest/(PRest);    # ug/kg, Hg  conc. in the venous blood of carcass (Rest of body)
+   CBld = ABldug/(VBld);      # ug/kg, concentration of Hg  in the blood
+   
+   
+   ######## tissue concentration
+   
+   # the liver
+   RL =(Kabs*AGI) + (QL*(CBld-CVL)) - (Kbile*AL) ;    # ug/h, Rate of change in liver
+   dt(AL) = RL;                                # ug, Amount in liver compartment
+   dt(AUCCL) = CL;                             # ug*h/L, Area under curve of Hg in the liver compartment
+   
+   # blood
+   RBld = (((QRest*CVRest)+(QK*CVK)+(QL*CVL)+(QBrn*CVBrn) -(QC*CBld))) + KIV ; #ug/hr
+   dt(ABldug) = RBld;                          # ug, Amount of the feces compartment
+   dt(AUCCBld) = CBld;                         # ug*hr/L, Area under curve of Hg  in blood
+   ABld=ABldug*1;                              # For likelihood calculation 
+
+   
+   # the kidney
+   RK = QK*(CBld-CVK) -(Kurine *AK);           # ug/hr, Rate of change in the kidney
+   dt(AK) = RK ;                               # ug, Amount in the kidney
+   dt(AUCCK) = CK;                             # ug*hr/L, Area under curve of Hg in the Kidney compartment
+   
+   # the brain
+   RBrn = QBrn*(CBld-CVBrn)- (Kbrn * ABrn);    # ug/hr, Rate of change in the brain
+   dt(ABrn) = RBrn;                            # ug, Amount in the brain
+   dt(AUCCBrn) = CBrn;                         # ug*hr/L, Area under curve of Hg  in the brain compartment
+   RBrnExcr = (Kbrn * ABrn);                   # ug/hr, Rate of active excretion from the brain  
+   dt(ABrnExcrug) = RBrnExcr;                  # ug, Amount of the feces compartment  
+   ABrnExcr = ABrnExcrug*1;                    # For likelihood calculation in excretion of IHg from brain  
+   
+   # the rest of the body (carcass)
+   RRest = QRest*(CBld-CVRest);                # ug/hr, Rate of change in Rest of body
+   dt(ARest) = RRest;                          # ug, Amount in Rest of body 
+   dt(AUCCRest) = CRest;                       # ug*hr/L, Area under curve of Hg in the compartment of Rest of body
+   
+   # Feces excretion 
+   Rfeces = (Kunabs*AGI) + (Kbile*AL);         # ug/hr, Rate of change in feces compartment
+   Rfeces_bile = (Kbile*AL);                   # ug/hr, Rate of change in feces by bile only in feces compartment
+   dt(Afecesug) = Rfeces;                      # ug, Amount of the feces compartment
+   Afeces=Afecesug*1;                          # For likelihood calculation 
+   dt(Afeces_bile) = Rfeces_bile;              # ug, Amount of the feces compartment by bile only
+   
+   # Urinary excretion
+   Rurine = Kurine*AK;                         # ug/hr, Rate of Hg  excreted into urine
+   dt(Aurineug) = Rurine;                      # ug, Amount in urine
+   Aurine = Aurineug*1;                        # For likelihood calculation 
+   
+   # Mass balance.
+   dt(A_in) = KGavage+ KIV + KDrink ;          # (vrisk)
+   
+   
+   ######  Unit conversion from ug/Kg or ug/L to ug/g or ug/mL
+   CLU = (CL/1000);         # ug/mL, conc. of Hg in the liver
+   CKU = (CK/1000);         # ug/mL, conc. of Hg in the kidney
+   CBrnU = (CBrn/1000);     # ug/mL, conc. of Hg in the brain
+   CRestU = (CRest/1000);   # ug/mL, conc. of Hg in the rest of the body (carcass)
+   CBldU  = (CBld/1000);    # ug/mL, conc. of Hg in the blood
+
+   CVLU = CVL/ 1000;        # ug/mL, conc. of Hg in the venous blood of liver
+   CVKU = CVK/ 1000;        # ug/mL, conc. of Hg  in the venous of the kidney
+   CVBrnU = CVBrn/ 1000;      # ug/mL, conc. of Hg in the venous blood of brain
+   CVRestU = CVRest/ 1000;  # ug/mL, Hg  conc. in the venous blood of carcass (Rest of body) 
+}
+# End of DYNAMICS.
+#------------------------------------------------------------------------------
+
+CalcOutputs{
+  TotTissue =  AK + AL +  ARest + ABrn  + ABld +AGI; # ug of total input including GI tract
+  TotTissueIn =  AK + AL +  ARest + ABrn  + ABld ;   # ug of total input excluding GI tract
+  
+  # tissue concentration in ug/kg or ug/L
+  CL = (CL < 1.0e-15 ? 1.0e-15 : CL);
+  CK = (CK < 1.0e-15 ? 1.0e-15 : CK);
+  CBrn = (CBrn < 1.0e-15 ? 1.0e-15 : CBrn);
+  CRest = (CRest < 1.0e-15 ? 1.0e-15 : CRest);
+  CBld  = (CBld  < 1.0e-15 ? 1.0e-15 :  CBld);
+
+  # tissue concentration in ug/g or ug/mL
+  CLU = (CLU < 1.0e-15 ? 1.0e-15 : CLU);
+  CKU = (CKU < 1.0e-15 ? 1.0e-15 : CKU);
+  CBrnU = (CBrnU < 1.0e-15 ? 1.0e-15 : CBrnU); 
+  CRestU = (CRestU < 1.0e-15 ? 1.0e-15 : CRestU);
+  CBldU  = (CBldU  < 1.0e-15 ? 1.0e-15 :  CBldU);
+
+  # ug, amount of iHg in blood or amoungt of excreted iHg in urine or feces
+  Aurine = (Aurine < 1.0e-15 ? 1.0e-15 : Aurine);
+  Afeces = (Afeces < 1.0e-15 ? 1.0e-15 : Afeces);
+  ABld = (ABld < 1.0e-15 ? 1.0e-15 : ABld);
+  ABrnExcr = (ABrnExcr < 1.0e-15 ? 1.0e-15 : ABrnExcr);
+  
+  Loss = Aurine + Afeces+ ABrnExcr;                        # ug, total excretion from feces and urine
+  Vbal= (0.93*BW)-VL-VK - VRest-VBld-VBrn;       # volume balance check
+  Qbal = QC-QL-QK-QRest-QBrn;                    # blood flow balance check 
+  BalanceCheck = (A_in - TotTissue - Loss);      # mass balance check 
+  
+}
+
+End.
