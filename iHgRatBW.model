@@ -114,6 +114,16 @@ Inputs = {
 
 #------------------------------------------------------------------------------
 # PARAMETERS for the model (which are independent of time).
+BW0 = 0.25;       # baseline body weight, kg
+sex=1;          # 1= male, 2= female
+BWgrowth=0;     # body growth, 1= yes, 0= no 
+Growthrate =0;  # study-specific body growth, hg/hr
+expowk = 0;     # exposure hours (hrs/wk)
+expodur = 0;    # exposure duration (hrs/whole study period)
+PDose = 0.0;    # Gavage (ug/kg/day)
+Drink = 0.0;   	# Drinking water dose (ug/kg/day)
+IVDose = 0.0;   # Drinking water dose (ug/kg)
+TChng 	= 0.05;	# IV infusion/gavage duration (hour); TCE TChng 	= 0.003;	Chiu 2014
 
 # chemical properties of Hg
 MW     =  200;     # g/mol, Hg contents of Hg  molecular mass
@@ -150,16 +160,6 @@ VBldC =  0.074 ;  #Fractional blood (Brown 1997; Davies, 1993)
 
 # End of PARAMETERS.
 #------------------------------------------------------------------------------
-BW0 = 0.25;       # baseline body weight, kg
-sex=1;          # 1= male, 2= female
-BWgrowth=0;     # body growth, 1= yes, 0= no 
-Growthrate =0;  # study-specific body growth, hg/hr
-expowk = 0;     # exposure hours (hrs/wk)
-expodur = 0;    # exposure duration (hrs/whole study period)
-PDose = 0.0;    # Gavage (ug/kg/day)
-Drink = 0.0;   	# Drinking water dose (ug/kg/day)
-IVDose = 0.0;   # Drinking water dose (ug/kg)
-TChng 	= 0.05;	# IV infusion/gavage duration (hour); TCE TChng 	= 0.003;	Chiu 2014
 
 #-----------------------------------------------------------------------
 #          Population mean for model parameters
