@@ -1,0 +1,457 @@
+#-------------------
+# iHgRat.MCMC.in.R
+#-------------------
+Integrate (Lsodes, 1e-6, 1e-6 , 1);
+# cd ./mcsim-6.2.0/IRIS_iHg/modeling/MCMC/RatHier
+
+MCMC ("MCMC.default.out","",  # name of output and restart file
+    "",          # name of data file
+    100000,0,      # iterations, print predictions flag,
+    1,100000,    # printing frequency, iters to print
+    5916);   # random seed (default )
+
+Level { # population level
+   
+    # Error distributions
+    Distrib (Ve_Aurine , LogUniform , 0.01 , 3.3 );
+    Distrib (Ve_Afeces , LogUniform , 0.01 , 3.3 );
+    Distrib (Ve_CBldU ,  LogUniform , 0.01 , 3.3 );
+    Distrib (Ve_CKU ,    LogUniform , 0.01 , 3.3 );
+    Distrib (Ve_CLU ,    LogUniform , 0.01 , 3.3 );
+    Distrib (Ve_CBrnU,   LogUniform , 0.01 , 3.3 );
+  
+    Likelihood (Aurine,  LogNormal_v, Prediction (Aurine) , Ve_Aurine);
+    Likelihood (Afeces,  LogNormal_v, Prediction (Afeces) , Ve_Afeces);
+    Likelihood (CBldU,   LogNormal_v, Prediction (CBldU) ,  Ve_CBldU);
+    Likelihood (CKU,     LogNormal_v, Prediction (CKU) ,    Ve_CKU);
+    Likelihood (CLU,     LogNormal_v, Prediction (CLU) ,    Ve_CLU);
+    Likelihood (CBrnU,   LogNormal_v, Prediction (CBrnU) ,  Ve_CBrnU);
+   
+    ###### POPULATION MEANS
+    Distrib	(M_lnPLC,	  TruncNormal,		2.37, 1.152, 0.068, 4.673);
+    Distrib	(M_lnPKC,	  TruncNormal,		5.775, 1.151, 3.472, 8.077); 
+    Distrib	(M_lnPBrnC,	TruncNormal,	   -0.197, 1.151, -2.5, 2.105); #Based on Young 2001 range
+    Distrib	(M_lnPRestC,TruncNormal,	    0.086, 1.152, -2.216, 2.389); #Based on Young 2001 range
+    
+    Distrib	(M_lnKabsC,	TruncNormal,		-3.411, 1.498, -6.407, -0.416);
+    Distrib	(M_lnKunabsC,TruncNormal,	  -0.821, 1.498, -3.817, 2.175);
+    Distrib	(M_lnKbileC,TruncNormal,		 0.03, 1.498,  -2.966, 3.025);
+    Distrib	(M_lnKurineC,TruncNormal,	  -2.526, 1.498, -5.521, 0.47);
+    Distrib	(M_lnKbrnC,	Uniform,        -6.836, 0.073); 
+    
+    ###### POPULATION VARIANCES
+   
+    Distrib (V_lnPLC,	  HalfNormal, 0.3);
+    Distrib (V_lnPKC,	  HalfNormal, 0.3	);
+    Distrib (V_lnPBrnC,	HalfNormal, 0.3	);
+    Distrib (V_lnPRestC,HalfNormal, 0.3	);
+   
+    Distrib (V_lnKabsC,	HalfNormal, 0.3	);
+    Distrib (V_lnKunabsC,HalfNormal, 0.3	);
+    Distrib (V_lnKbileC, HalfNormal, 0.3	);
+    Distrib (V_lnKurineC,HalfNormal, 0.3	);
+    Distrib (V_lnKbrnC,	 HalfNormal, 0.3	);
+   
+   Level { #Study level
+   
+    Distrib (lnPLC, TruncNormal_v, M_lnPLC, V_lnPLC,              0.068, 4.673);       
+    Distrib (lnPKC, TruncNormal_v, M_lnPKC, V_lnPKC,              3.472, 8.077);          
+    Distrib (lnPBrnC, TruncNormal_v, M_lnPBrnC, V_lnPBrnC,         -2.5, 2.105);    
+    Distrib (lnPRestC, TruncNormal_v, M_lnPRestC, V_lnPRestC,    -2.216, 2.389);   
+   
+    Distrib (lnKabsC, TruncNormal_v, M_lnKabsC, V_lnKabsC,        -6.407, -0.416);
+    Distrib (lnKunabsC, TruncNormal_v, M_lnKunabsC, V_lnKunabsC,  -3.817, 2.175);
+    Distrib (lnKbileC, TruncNormal_v, M_lnKbileC, V_lnKbileC,     -2.966, 3.025);
+    Distrib (lnKurineC, TruncNormal_v, M_lnKurineC, V_lnKurineC,   -5.521, 0.47);
+    Distrib (lnKbrnC, TruncNormal_v, M_lnKbrnC, V_lnKbrnC,        -6.836, 0.073);
+
+      
+ Level { # Study 1. Rothstein, 1960, male rat
+   
+   Experiment { # Experiment 1, # Study 1, w/ single IV dose of 250 ug Hg/kg (50 ug 203Hg from Hg(NO3)2:
+      
+   BW0 = 0.2;
+   BWgrowth=0;
+   sex=1;
+   Growthrate = 0.0;
+   TChng 	= 0.003;
+   
+   # oral and IV administration
+   PDose = PerDose(0.0, 24,   0,   0.05);
+   IVDose = PerDose(250, 24,   0,   0.003);
+   
+   expowk =   PerDose(1.0, 168,   0, 0.003);
+   expodur =   PerDose(1.0, 360, 0, 0.003);
+   Drink = 0.0 ;
+   
+   Print (Aurine, 24,	48,	144,	360);
+   Data  (Aurine, 1.306962025,	2.458860759,	3.743670886,	6.091772152);
+   
+   Print (Afeces , 24,	48,	144,	360);
+   Data  (Afeces, 3.344936709, 6.82278481, 10.65506329, 13.18037975);
+   
+   # Print (CKU, 24,	48,	144,	360);
+   # Data  (CKU, 0.74702381 , 0.694047619 , 1.047321429 , 1.045535714);
+   
+   # Print (CLU, 24,	48,	144,	360);
+   # Data  (CLU, 0.332142857 , 0.224285714 , 0.121428571 , 0.04);
+   
+   # Print (CBrnU, 24,	48,	144,	360);
+   # Data  (CBrnU, 0.01754386 , 0.01754386 , 0.01754386 , 0.013157895);
+   
+   # Print (Aurine,  0);
+   # Data  (Aurine, -1);
+   
+   # Print (Afeces,  0);
+   # Data  (Afeces, -1); 
+ 
+   Print (CBldU,  0);
+   Data  (CBldU, -1);
+   
+   Print (CKU,  0);
+   Data  (CKU, -1);
+   
+   Print (CLU,  0);
+   Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+   
+    } # endof experiment #1
+   
+ } # end of Study #1. 
+   
+   
+ Level { # Study 2. Oriquat, 2013, male rat
+
+   Experiment { # Experiment 1, Study 2, Multiple oral (p.o. twice weekly) of 2770   ug Hg/kg (3.75 mg/kg) for 12 weeks
+   
+   BW0 = 0.15;
+   BWgrowth= 0;
+   sex=1;
+   Growthrate = 0.0;
+   TChng 	= 0.05;
+
+   # oral and IV administration
+   PDose = NDoses(48 , 2770  , 0,	2770  , 0, 	2770  , 0,	2770  , 0, 	2770  , 0,	2770  , 0, 	
+                         2770  , 0,	2770  , 0,	2770  , 0,	2770  , 0, 	2770  , 0,	2770  , 0, 	2770  , 0,	
+                         2770  , 0, 	2770  , 0,	2770  , 0, 	2770  , 0,	2770  , 0, 	2770  , 0,	2770  , 0, 	
+                         2770  , 0,	2770  , 0, 	2770  , 0,	2770  , 0,	
+                         0 , 0.05 , 	72 , 72.05 , 	168 , 168.05 , 	240 , 240.05 , 	336 , 336.05 , 	
+                         408 , 408.05 , 	504 , 504.05 , 	576 , 576.05 , 	672 , 672.05 , 	744 , 744.05 , 	
+                         840 , 840.05 , 	912 , 912.05 , 	1008 , 1008.05 , 	1080 , 1080.05 , 	1176 , 1176.05 , 	
+                         1248 , 1248.05 , 	1344 , 1344.05 , 	1416 , 1416.05 , 	1512 , 1512.05 , 	
+                         1584 , 1584.05 , 	1680 , 1680.05 , 	1752 , 1752.05 , 	1848 , 1848.05 , 	1925 , 1925.05);
+      
+   expowk = 1;
+   expodur = 1;
+   
+   IVDose = PerDose(0.0, 24,   0, 0.003);
+   Drink = 0;
+   
+   Print (CBldU, 672 , 1344 , 2016);
+   Data (CBldU, 0.042074074 , 0.047703704 , 0.057777778);
+
+   Print (Aurine,  0);
+   Data  (Aurine, -1);
+   
+   Print (Afeces,  0);
+   Data  (Afeces, -1); 
+ 
+   # Print (CBldU,  0);
+   # Data  (CBldU, -1);
+   
+   Print (CKU,  0);
+   Data  (CKU, -1);
+   
+   Print (CLU,  0);
+   Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+
+   } # end of experiment #1, Study #2. 
+   
+ } # end of Study #2. 
+
+
+ Level { # Study 3. Morcillo 1995, Male rats
+    
+   Experiment { # Experiment 1, Study 3, Daily drinking water of 5 uM Hg, 100.0 ug/kg/day)
+   
+   BW0 = 0.13;
+   BWgrowth=1;
+   sex=1;
+   Growthrate = 0.000119895;
+   TChng 	= 0.05;
+   
+   # oral and IV administration
+   PDose = PerDose(0.0, 24,   0, 0.05);
+   IVDose = PerDose(0, 24,   0, 0.003);
+   Drink = 100.0;
+   
+   expowk = 1;
+   expodur = 1;
+   
+	 Print	(Aurine,	336, 672, 1008, 1344);
+	 Data	  (Aurine,	0.603448276, 3.448275862, 6.637931034, 9.827586207);
+									
+	 Print	(Afeces,	336, 672, 1008, 1344);
+	 Data 	(Afeces,	206.8965517, 448.2758621, 724.137931, 984.615385);
+
+   
+   Print (CBldU, 168 , 336 , 504 , 672 , 840 , 1008 , 1176 , 1344);
+   Data  (CBldU, 0.00848, 0.01066, 0.01045, 0.0107, 0.01127, 0.00811, 0.00659, 0.00525);
+   
+   # Print (Aurine,  0);
+   # Data  (Aurine, -1);
+   
+   # Print (Afeces,  0);
+   # Data  (Afeces, -1); 
+ 
+   # Print (CBldU,  0);
+   # Data  (CBldU, -1);
+   
+   Print (CKU,  0);
+   Data  (CKU, -1);
+   
+   Print (CLU,  0);
+   Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+
+   } # end of experiment #1, Study #3. 
+   
+   
+   Experiment { # Experiment 2, Study 3, Daily drinking water of 50 uM Hg, 1000.0 ug/kg/day)
+   
+   BW0 = 0.13;
+   BWgrowth=1;
+   sex=1;
+   Growthrate = 0.0001218286;
+   TChng 	= 0.05;
+   
+   # oral and IV administration
+   PDose = PerDose(0.0, 24,   0, 0.05);
+   IVDose = PerDose(0, 24,   0, 0.003);
+   Drink = 1000.0 ; # Drinking water dose (ug/kg/day) 
+   
+   expowk = 1;
+   expodur = 1;
+   
+	 Print	(Aurine,	336, 672, 1008, 1344);
+	 Data	  (Aurine,	8.720689655, 29.31034483, 87.93103448, 163.7931034);
+									
+	 Print	(Afeces,	336, 672, 1008, 1344);
+	 Data 	(Afeces,	2086.956522, 5113.043478, 7513.043478, 10121.73913);
+
+   
+   Print (CBldU, 168 , 336 , 504 , 672 , 840 , 1008 , 1176 , 1344);
+   Data  (CBldU, 0.07167, 0.05471, 0.06394, 0.06063, 0.04959, 0.06375, 0.06978, 0.05874);
+   
+   # Print (Aurine,  0);
+   # Data  (Aurine, -1);
+   
+   # Print (Afeces,  0);
+   # Data  (Afeces, -1); 
+ 
+   # Print (CBldU,  0);
+   # Data  (CBldU, -1);
+   
+   Print (CKU,  0);
+   Data  (CKU, -1);
+   
+   Print (CLU,  0);
+   Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+   
+   } # end of experiment #2, Study #3. 
+   
+   Experiment { # Experiment 3, Study 3, Daily drinking water of 5000 uM Hg, 7200.0 ug/kg/day)  
+   
+   BW0 = 0.13;
+   BWgrowth=1;
+   sex=1;
+   Growthrate = 0.0000992677;
+   TChng 	= 0.05;
+   
+    # oral and IV administration
+   PDose = PerDose(0.0, 24,   0, 0.05);
+   IVDose = PerDose(0, 24,   0, 0.003);
+   Drink = 7270.0 ;   
+   
+   expowk = 1;
+   expodur = 1;
+   
+   Print (Aurine, 336 , 672 , 1008 , 1344);
+   Data  (Aurine, 818.9655172 , 2068.965517 , 3405.172414 , 4827.586207);
+   
+	 Print	(Afeces,	336, 672, 1008, 1344);
+   Data 	(Afeces,	14102.5641, 28846.15385, 45512.82051, 60897.4359);
+
+   Print (CBldU, 168 , 336 , 504 , 672 , 840 , 1008 , 1176 , 1344);
+   Data  (CBldU, 0.29892 , 0.1852 , 0.21552 , 0.34776 , 0.28396 , 0.32497 , 0.2738 , 0.25756);
+   
+   # Print (Aurine,  0);
+   # Data  (Aurine, -1);
+   
+   # Print (Afeces,  0);
+   # Data  (Afeces, -1); 
+ 
+   # Print (CBldU,  0);
+   # Data  (CBldU, -1);
+   
+   Print (CKU,  0);
+   Data  (CKU, -1);
+   
+   Print (CLU,  0);
+   Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+   
+   
+   } # end of experiment #3, Study #3. 
+
+  } # end of Study #3. Morcillo 1995
+
+ 
+ Level { # Study 4. NTP 1993, 6-month female rats )
+
+   Experiment { # Experiment 1, Study 4, daily gavage with 230 ug Hg/kg )
+     
+    BW0 = 0.123;
+    BWgrowth=1;
+    sex=2;
+    Growthrate = 0.00002412481;
+    TChng 	= 0.05;
+
+   
+   # oral and IV administration
+   PDose = PerDose(230, 24,  0, 0.05);
+   IVDose = PerDose(0.0, 24,  0, 0.003);
+   Drink = 0;
+   
+   expowk = PerDose(1.0, 168,  0, 120);
+   expodur =  PerDose(1.0, 4320, 0, 4320);
+   
+   Print (CKU, 1428, 2868,	4308);
+   Data  (CKU, 29.37, 55.59, 46.98);
+  
+   Print (Aurine,  0);
+   Data  (Aurine, -1);
+   
+   Print (Afeces,  0);
+   Data  (Afeces, -1); 
+ 
+   Print (CBldU,  0);
+   Data  (CBldU, -1);
+   
+   # Print (CKU,  0);
+   # Data  (CKU, -1);
+   
+   Print (CLU,  0);
+   Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+   
+   } # end of experiment #1, Study #4. 
+   
+   
+   Experiment { # Experiment 2, Study 4,  daily gavage with 925 ug Hg/kg)
+   
+   BW0 = 0.123;
+   BWgrowth=1;
+   sex=2;
+   Growthrate = 0.00002412481;
+   TChng 	= 0.05;
+
+   # oral and IV administration
+   PDose = PerDose(925, 24,  0, 0.05);
+   IVDose = PerDose(0.0, 24,  0, 0.003);
+   
+   expowk = PerDose(1.0, 168,  0, 120);
+   expodur =  PerDose(1.0, 4320, 0, 4320);
+   
+   Print (CKU, 1428, 2868,	4308);
+   Data  (CKU, 100.87, 97.19, 86.08);
+  
+   Print (CLU, 1428, 2868,	4308);
+   Data  (CLU, 0.05, 0.38, 0.44);
+
+   Print (Aurine,  0);
+   Data  (Aurine, -1);
+   
+   Print (Afeces,  0);
+   Data  (Afeces, -1); 
+ 
+   Print (CBldU,  0);
+   Data  (CBldU, -1);
+   
+   # Print (CKU,  0);
+   # Data  (CKU, -1);
+   
+   # Print (CLU,  0);
+   # Data  (CLU, -1);
+   
+   Print (CBrnU,   0);
+   Data  (CBrnU,  -1);
+   
+   } # end of experiment #2, 925 ug Hg/kg, Study #4. 
+   
+   Experiment { # Experiment 3, Study 4,  daily gavage with 3695 ug Hg/kg)  
+   
+   BW0 = 0.123;
+   BWgrowth=1;
+   sex=2;
+   Growthrate = 0.00002412481;
+   TChng 	= 0.05;
+
+   
+   # oral and IV administration
+   PDose = PerDose(3695, 24,  0, 0.05);
+   IVDose = PerDose(0.0, 24,  0, 0.003);
+   
+   expowk = PerDose(1.0, 168,  0, 120);
+   expodur =  PerDose(1.0, 4320, 0, 4320);
+   
+   Print (CKU, 1428, 2868,	4308);
+   Data  (CKU, 101.87, 122.19, 92.78);
+  
+   Print (CLU, 1428, 2868,	4308);
+   Data  (CLU, 1.00, 1.62, 1.86);
+  
+   Print (CBrnU, 1428,  4308);
+   Data  (CBrnU, 0.06,  0.01);
+
+   Print (Aurine,  0);
+   Data  (Aurine, -1);
+   
+   Print (Afeces,  0);
+   Data  (Afeces, -1); 
+ 
+   Print (CBldU,  0);
+   Data  (CBldU, -1);
+   
+   # Print (CKU,  0);
+   # Data  (CKU, -1);
+   
+   # Print (CLU,  0);
+   # Data  (CLU, -1);
+   
+   # Print (CBrnU,   0);
+   # Data  (CBrnU,  -1);
+   
+   } # end of experiment #3, daily gavage with 3695 ug Hg/kg, Study #4. 
+   
+  } # end of Study #4. NTP 1993, 6 month, female
+ 
+ } # end of study level
+    
+} # Population level
+   
+End. 
