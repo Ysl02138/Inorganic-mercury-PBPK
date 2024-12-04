@@ -1,0 +1,62 @@
+#-------------------
+# iHg validation for Human 
+#-------------------
+Integrate (Lsodes, 1e-6, 1e-6, 1);
+
+SetPoints ("poppredHuman.out",
+           "poppredHuman.dat", 
+           0,	
+           
+           Ve_Aurine,
+           Ve_Afeces,
+           Ve_ABld,
+           M_lnPLC, 
+           M_lnPKC, 
+           M_lnPBrnC, 
+           M_lnPRestC,
+           M_lnKabsC,
+           M_lnKunabsC,
+           M_lnKbileC,
+           M_lnKurineC,
+           M_lnKbrnC,
+           V_lnPLC, 
+           V_lnPKC, 
+           V_lnPBrnC, 
+           V_lnPRestC,
+           V_lnKabsC,
+           V_lnKunabsC,
+           V_lnKbileC,
+           V_lnKurineC,
+           V_lnKbrnC);
+
+Distrib (lnPLC, TruncNormal_v, M_lnPLC, V_lnPLC,             -0.119, 4.486);  
+Distrib (lnPKC, TruncNormal_v, M_lnPKC, V_lnPKC,              0.806, 5.412);
+Distrib (lnPBrnC, TruncNormal_v, M_lnPBrnC, V_lnPBrnC,        -1.76, 2.845);   
+Distrib (lnPRestC, TruncNormal_v, M_lnPRestC, V_lnPRestC,    -2.216, 2.389);  
+ 
+Distrib (lnKabsC, TruncNormal_v, M_lnKabsC, V_lnKabsC,       -6.407, -0.416);
+Distrib (lnKunabsC, TruncNormal_v, M_lnKunabsC, V_lnKunabsC, -3.817, 2.175);
+Distrib (lnKbileC, TruncNormal_v, M_lnKbileC, V_lnKbileC,    -3.396, 2.595);
+Distrib (lnKurineC, TruncNormal_v, M_lnKurineC, V_lnKurineC, -5.655, 0.336);
+Distrib (lnKbrnC, TruncNormal_v, M_lnKbrnC, V_lnKbrnC,       -7.293, 0.531);
+
+
+Experiment { # Human Yoshida 1998
+  BW0 = 48;
+  BWgrowth=0;
+  sex=2;
+  Growthrate = 0;
+  TChng 	= 0.05;
+  
+  PDose = PerDose(13750, 24,  0, 0.05);
+  IVDose = PerDose(0, 24,  0, 0.003);
+  
+  expowk = PerDose(1.0, 168,  0, 0.05);
+  expodur = PerDose(1.0, 3300, 0, 0.05);
+  Drink = 0.0 ;
+  
+  Print (Aurine, 2242);
+
+}
+
+End. 

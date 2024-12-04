@@ -1,0 +1,80 @@
+#------------------------------------------------------------------------------
+#
+# Set points simulation input file for iHg
+#
+# This file contains simulation descriptions from atheoretical
+# experiment exposing Humans
+#
+# 0.118 mg Hg/kg/d (LOAEL) over a simulation of 26 weeks, the same as mice
+# Copyright (c) 1993-2017 Free Software Foundation, Inc.
+#------------------------------------------------------------------------------
+
+Integrate (Lsodes, 1e-6, 1e-6, 1);
+
+SetPoints ("Human.HED.out", "Human.HED.dat", 0,
+
+    Ve_Aurine, 
+    Ve_Afeces, 
+    Ve_ABld,
+
+    M_lnPLC,	  
+    M_lnPKC,	  
+    M_lnPBrnC,	
+    M_lnPRestC,
+    
+    M_lnKabsC,
+    M_lnKunabsC,
+    M_lnKbileC,
+    M_lnKurineC,
+    M_lnKbrnC,	
+    
+    V_lnPLC,	 
+    V_lnPKC,	  
+    V_lnPBrnC,	
+    V_lnPRestC,
+   
+    V_lnKabsC,	
+    V_lnKunabsC,
+    V_lnKbileC, 
+    V_lnKurineC,
+    V_lnKbrnC,	
+    ); 
+    
+  Distrib (lnPLC, TruncNormal_v, M_lnPLC, V_lnPLC,             -0.119, 4.486);  
+  Distrib (lnPKC, TruncNormal_v, M_lnPKC, V_lnPKC,              0.806, 5.412);
+  Distrib (lnPBrnC, TruncNormal_v, M_lnPBrnC, V_lnPBrnC,        -1.76, 2.845);   
+  Distrib (lnPRestC, TruncNormal_v, M_lnPRestC, V_lnPRestC,    -2.216, 2.389);  
+   
+  Distrib (lnKabsC, TruncNormal_v, M_lnKabsC, V_lnKabsC,       -6.407, -0.416);
+  Distrib (lnKunabsC, TruncNormal_v, M_lnKunabsC, V_lnKunabsC, -3.817, 2.175);
+  Distrib (lnKbileC, TruncNormal_v, M_lnKbileC, V_lnKbileC,    -3.396, 2.595);
+  Distrib (lnKurineC, TruncNormal_v, M_lnKurineC, V_lnKurineC, -5.655, 0.336);
+  Distrib (lnKbrnC, TruncNormal_v, M_lnKbrnC, V_lnKbrnC,       -7.293, 0.531 );
+   
+#---------------------------------------------------------
+
+
+Simulation { #daily dring water for 26 weeks, same as the mice
+  
+  BW0 = 80;
+  BWgrowth=0;
+  sex=1;
+  Growthrate = 0;
+  TChng 	= 0.05;
+
+  PDose = PerDose(0.0, 24,  0, 0.05);
+  IVDose = PerDose(0, 24,  0, 0.003);
+  Drink = 118;
+  
+  expowk = 1;
+  expodur = 1;
+ 
+  Print (AUCCL, AUCCK, AUCCBrn, AUCCBld,  CBldU, CKU, 4368); #4368 hrs  = 26 week
+  
+  #
+}
+
+END.
+
+
+

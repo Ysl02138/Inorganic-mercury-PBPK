@@ -1,0 +1,196 @@
+#-------------------
+# iHgMouse_MCMC_setpts.in
+#-------------------
+Integrate (Lsodes, 1e-6, 1e-6, 1);
+
+SetPoints ("poppredMouse.out",
+           "poppredMouse.dat", 
+           0,	
+           Ve_Aurine , 
+           Ve_CBldU , 
+           Ve_CKU , 
+           Ve_CLU , 
+           Ve_CBrnU, 
+           
+           M_lnPLC, 
+           M_lnPKC, 
+           M_lnPBrnC, 
+           M_lnPRestC,
+           M_lnKabsC,
+           M_lnKunabsC,
+           M_lnKbileC,
+           M_lnKurineC,
+           M_lnKbrnC,
+           V_lnPLC, 
+           V_lnPKC, 
+           V_lnPBrnC, 
+           V_lnPRestC,
+           V_lnKabsC,
+           V_lnKunabsC,
+           V_lnKbileC,
+           V_lnKurineC,
+           V_lnKbrnC);
+
+Distrib	(lnPLC,	    TruncNormal_v,	M_lnPLC,    V_lnPLC,    -0.524, 4.081); #Based on Young 2001 
+Distrib	(lnPKC,	    TruncNormal_v,	M_lnPKC,    V_lnPKC,     0.916, 5.521); #Based on Young 2001, Carrier 
+Distrib	(lnPBrnC,	  TruncNormal_v,	M_lnPBrnC,  V_lnPBrnC,  -2.581, 2.024); #Based on Young 2001 range
+Distrib	(lnPRestC,	TruncNormal_v,  M_lnPRestC, V_lnPRestC, -2.216, 2.389); #Based on Young 2001 range
+
+Distrib	(lnKabsC,	  TruncNormal_v,	M_lnKabsC,   V_lnKabsC,   -6.407, -0.416);
+Distrib	(lnKunabsC, TruncNormal_v,	M_lnKunabsC, V_lnKunabsC, -3.817, 2.175);
+Distrib	(lnKbileC,	TruncNormal_v,	M_lnKbileC,  V_lnKbileC,  -3.558, 2.434);
+Distrib	(lnKurineC, TruncNormal_v,	M_lnKurineC, V_lnKurineC, -5.521, 0.47);
+Distrib	(lnKbrnC,	  TruncNormal_v,  M_lnKbrnC,   V_lnKbrnC    -6.836, 0.073); 
+
+Simulation { # female oral of 1250 ug HgCl2 (or 925 ug Hg)/kg/d for 6 months, NTP 1993
+  
+  BW0 = 0.018;
+  BWgrowth= 1;
+  sex= 2;
+  Growthrate = 0.000002187500;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(925, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);
+  Drink = 0.0 ;
+  
+  expowk = PerDose(1.0, 168,  0, 120);
+  expodur = PerDose(1.0, 4320, 0, 4320);
+  
+  Print (CKU, CLU, 1428, 2868,	4308);
+  
+} # end of Simulation #1,  1250 ug HgCl2 (or 925 ug Hg)/kg/d, NTP 6-month female Mouse
+
+
+Simulation { # Experiment 2, # female oral of 5000 ug HgCl2 (or 3695 ug Hg)/kg/d for 6 months, NTP 1993
+  
+  BW0 = 0.018;
+  BWgrowth= 1;
+  sex= 2;
+  Growthrate = 0.000002187500;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(3695, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);
+  Drink = 0;
+  
+  expowk = PerDose(1.0, 168,  0, 120);
+  expodur = PerDose(1.0, 4320, 0, 4320);
+  
+  Print (CKU, CLU, 1428, 2868,	4308);
+  
+} # end of Simulation #2, NTP 6 month female Mouse, 5000 ug HgCl2 (or 3695 ug Hg)/g
+
+
+Simulation { # female oral of 20000 ug HgCl2 (or 14775 ug Hg)/kg/d for 6 months, NTP 1993
+  
+  BW0 = 0.018;
+  BWgrowth= 1;
+  sex= 2;
+  Growthrate = 0.000002187500;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(14775, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);
+  Drink = 0;
+  
+  expowk = PerDose(1.0, 168,  0, 120);
+  expodur = PerDose(1.0, 4320, 0, 4320);
+  
+  Print (CKU, CLU, CBrnU, 1428, 2868,	4308);
+  
+} # end of Simulation #3, 20000 ug HgCl2 (or 14775 ug Hg)/kg/d, NTP 6 month female Mouse
+
+
+
+Simulation { # male Mouse oral of 29550 ug Hg/kg/d for 2 weeks - 12 days (16 day study) NTP 1993
+  
+  BW0 = 0.023;
+  BWgrowth=1;
+  sex=1;
+  Growthrate = 0.00000425;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(29550.0, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);  
+  Drink = 0;
+  
+  expowk =   PerDose(1.0, 168,  0, 144);
+  expodur = PerDose(1.0, 384, 0, 288);
+  
+  Print (CLU, CKU, CBrnU, 384);
+  
+} 
+
+
+Simulation { # female Mouse oral of 29550 ug Hg/kg/d for 2 weeks - 12 days (16 day study) NTP 1993
+  
+  BW0 = 0.018;
+  BWgrowth=1;
+  sex=2;
+  Growthrate = 0.00000625;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(29550.0, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);
+  Drink = 0.0 ;
+  
+  expowk =  PerDose(1.0, 168,  0, 144);
+  expodur = PerDose(1.0, 384, 0, 288);
+  
+  Print (CLU, CKU, CBrnU, 384);
+
+} # end of Simulation #1, NTP 16 day (study duration)/12 day (experiment) female Mouse
+
+
+
+
+Simulation { #Female Swiss Albino  Mouse with 10 days 6000 ug/kg,  Sin 1990
+  
+  BW0 = 0.0225;
+  BWgrowth=0;
+  sex=2;
+  Growthrate = 0;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(6000, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);
+  Drink = 0;
+  
+  expowk = PerDose(1.0, 168,  0, 168);
+  expodur =  PerDose(1.0, 240, 0, 240);
+  
+  Print (CLU, CKU, CBrnU, 240);
+
+} # end of Simulation 
+
+
+
+Simulation { #C57BL/6J Mouse, male, 10000 ug HgCl2 (or 7390 ug Hg)/kg, Wang 2013
+  
+  BW0 = 0.019;
+  BWgrowth=0;
+  sex=1;
+  Growthrate = 0;
+  TChng 	= 0.05;
+  
+  # oral and IV administration
+  PDose = PerDose(7390, 24,  0, 0.05);
+  IVDose = PerDose(0.0, 24,  0, 0.003);
+  Drink = 0;
+  
+  expowk = PerDose(1.0, 168,  0, 168);
+  expodur =  PerDose(1.0, 240, 0, 240);
+  
+  Print (CLU, CKU, CBrnU, CBldU, 240);
+
+} # end of Simulation 
+
+End. 
+
