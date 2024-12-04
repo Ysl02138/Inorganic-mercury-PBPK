@@ -1,0 +1,141 @@
+# ---
+# title: "iHg - Markov chain Monte Carlo Calibration Diagnosis"
+# author: "YS Lin and NH Hsieh" 
+# date: "2023/02/05 (update: `r Sys.Date()`)"
+# output: 
+#  html_document:
+# fig_caption: yes  
+# ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T)
+setwd('..')
+wd <- getwd()
+knitr::opts_knit$set(root.dir =  wd)
+```
+
+# 0 Prerequisites
+```{r, include=FALSE}
+source("MCSim/function.R")
+getwd()
+```
+
+# Import the R packages
+```{r}
+library(tidyverse, quietly=T)
+library(rstan, quietly=T)
+library(bayesplot, quietly=T)
+library(coda, quietly=T)
+library(corrplot, quietly=T)
+library(sensitivity, quietly=T)
+library(pksensi, quietly=T)
+library(data.table, quietly=T)
+library(GGally, quietly=T)
+library(ggplot2, quietly=T)
+library(ggcorrplot, quietly=T)
+theme_set(theme_bw())
+```
+
+# This section will produce Supplemental Figure S2 and Figure S5
+```{r, eval=F}
+Ratjob1 <- fread("outputs/iHgRat_4880.out")|> as.data.frame()
+Ratjob2 <- fread("outputs/iHgRat_3365.out")|> as.data.frame()
+Ratjob3 <- fread("outputs/iHgRat_5916.out")|> as.data.frame()
+Ratjob4 <- fread("outputs/iHgRat_6734.out")|> as.data.frame()
+Rat_x <- mcmc_array(data = list(Ratjob1, Ratjob2, Ratjob3, Ratjob4))
+str <- ceiling(nrow(Rat_x)/2) + 1
+end <- nrow(Rat_x)
+j <- c(str:end) # discard burn-in
+sample_x <- seq(50001, 100000, 10)
+Rat_x2 <- Rat_x[sample_x,,]
+mcmc_Rat <- Rat_x2 
+save(mcmc_Rat, file = "mcmc_Rat.RData")
+
+pars_Pop <- c("M_lnPLC(1)", "M_lnPKC(1)", "M_lnPBrnC(1)",	"M_lnPRestC(1)",	"M_lnKabsC(1)",	"M_lnKunabsC(1)",	"M_lnKbileC(1)",	"M_lnKurineC(1)",	"M_lnKbrnC(1)")
+tp_Rat <-bayesplot::mcmc_trace(Rat_x2 [,,], pars = pars_Pop)
+dp_Rat <-bayesplot::mcmc_dens_overlay(Rat_x2 [,,],  pars = pars_Pop)
+ggplot2::ggsave(filename = "plots/suppl/Figure_S2_traceplot_Rat.eps", 
+                plot = tp_Rat, 
+                device = cairo_ps, 
+                dpi = 1200, 
+                width = 15,
+                height = 10, 
+                units = "cm")
+
+ggplot2::ggsave(filename = "plots/suppl/Figure_S5_density_Rat.eps", 
+                plot = dp_Rat, 
+                device = cairo_ps, 
+                dpi = 1200, 
+                width = 15,
+                height = 10, 
+                units = "cm")
+```
+
+# Andrew Gelman Scale Reduction Factor
+# This section will produce results for posterior distributions for Supplemental Table S5 and S8
+#
+# From Supplemenal Table S5, one can take ant-log for each scaling coefficient parameter represents the posterior estimate as shown 
+# in Table 3 (e.g., exp(lnPLC) = exp (1.753) = 5.77 (PLC), the liver: blood coefficient for rat).  
+#
+# For Supplemental Table S8, rResidual error geometric standard deviation was calculated as exponential form of the square root of the error term 
+# (e.g., “Ve_Aurine” for urine) 
+```{r}
+Ratmonitor <-monitor(Rat_x, digits=4, probs = c(0.025, 0.5, 0.975), warmup = floor(dim(Rat_x)[1]/2))
+print(Ratmonitor)
+dim(Rat_x)
+```
+
+# MPSRF
+# This section will produce MPSRF values for Supplemental Figure S2 traceplot
+```{r}
+Ratjob1 = as.mcmc(fread("outputs/iHgRat_4880.out") |> as.data.frame(), header=T) 
+Ratjob2 = as.mcmc(fread("outputs/iHgRat_3365.out") |> as.data.frame(), header=T) 
+Ratjob3 = as.mcmc(fread("outputs/iHgRat_5916.out") |> as.data.frame(), header=T) 
+Ratjob4 = as.mcmc(fread("outputs/iHgRat_6734.out") |> as.data.frame(), header=T) 
+
+x1Rat <- Ratjob1[,2:61, drop=FALSE]
+x2Rat <- Ratjob2[,2:61, drop=FALSE]
+x3Rat <- Ratjob3[,2:61, drop=FALSE]
+x4Rat <- Ratjob4[,2:61, drop=FALSE]
+
+combined = mcmc.list(x1Rat,x2Rat,x3Rat,x4Rat) 
+gelman.diag(combined, autoburnin=TRUE, multivariate=TRUE)
+```
+
+# Correlation matrix of population posterior iHg-specific parameters 
+# For Supplemental Figure S8  
+```{r}
+sim1.1 <- fread("outputs/iHgRat_3365.out") 
+sim2.1 <- fread("outputs/iHgRat_4880.out") 
+sim3.1 <- fread("outputs/iHgRat_5916.out") 
+sim4.1 <- fread("outputs/iHgRat_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Rat_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Rat_corr)
+
+pars_name <- dimnames(Rat_corr)[[3]]
+str <- which(pars_name == "M_lnPLC(1)")
+end <- which(pars_name == "M_lnKbrnC(1)")
+M_pars <- pars_name[str:end]
+sample_x <- seq(50001, 100000, 1)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Rat_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  # GGally::
+  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha=T) +
+  theme_minimal() + labs(title = "Rat") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Figure_S8_Correlation_matrix_Rat.pdf", dpi = 1200, height = 10, width = 15, units="in")
+```
+
+```{r, include=FALSE}
+clear()
+```
