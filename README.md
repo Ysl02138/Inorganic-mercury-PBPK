@@ -21,7 +21,7 @@ rat and human, respectively).
 
 (b) Posterior distributions for human model residual errors (Supplemental Table S9)
 
-(c) Traces plot of IHG-specific population parameters in humans including the estimated value of Brooks-Gelman Multivariate Shrink Factors (MPSRF) 
+(c) Traces plot of iHg-specific population parameters in humans including the estimated value of Brooks-Gelman Multivariate Shrink Factors (MPSRF) 
 (Supplemental Figure S3)
 
 (d) Probability density function plots of IHG-specific population parameters for humans (Supplemental Figure S6)
