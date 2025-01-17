@@ -175,7 +175,7 @@ ylab <- ggdraw() +
   )
 
 # plot
-pdf(file = "plots/Figure_3C_calibration_Human.pdf", height = 6, width = 18)
+
 plot_grid(
   ylab,
   plot_grid(
@@ -185,6 +185,7 @@ plot_grid(
   ),
   nrow = 1, rel_widths = c(0.02, 1)
 )
+ggsave(file = "plots/Figure_2C_calibration_Human.jpg", height = 6, width = 18, dpi = 600)
 dev.off()
 
 

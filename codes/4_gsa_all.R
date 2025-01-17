@@ -213,13 +213,13 @@ set_theme <- theme(
   axis.title       = element_blank(),
 )
 
-pdf("plots/Figure_5_GSA.pdf",width=11)
 ggplot(x_total, aes(x = parameter, y = index, fill=order)) +
   geom_bar(position = "stack", stat = "identity") + 
   coord_flip() +
   facet_grid(variable ~ factor (exposure, levels=c("Mouse", "Rat", "Human"))) + 
   theme_bw() +
-  ggtitle("Figure 5 (Sensitivity analysis for all three species)") +
+  ggtitle("Supplemental_Figure_S11 (Sensitivity analysis for all three species)") +
   scale_fill_viridis(discrete = TRUE, direction = -1, end = 0.8) + 
   set_theme
+ggsave(file = "plots/suppl/Supplemental_Figure_S11_GSA.jpg", height = 8, width = 16, dpi = 600)
 dev.off()  

@@ -226,7 +226,7 @@ ylab <- ggdraw() +
   )
 
 # plot
-pdf(file = "plots/Figure_3B_calibration_Rat.pdf", height = 12, width = 20)
+
 plot_grid(
   ylab,
   plot_grid(
@@ -243,5 +243,6 @@ plot_grid(
     xlab, nrow = 3, rel_heights = c(0.05, 1, 0.05)),
   nrow = 1, rel_widths = c(0.02, 1)
 )
+ggsave(file = "plots/Figure_2B_calibration_Rat.jpg", height = 12, width = 20, dpi = 600)
 dev.off()
 

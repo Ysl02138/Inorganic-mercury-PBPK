@@ -54,7 +54,7 @@ save(mcmc_Mouse, file = "mcmc_Mouse.RData")
 pars_Pop <- c("M_lnPLC(1)", "M_lnPKC(1)", "M_lnPBrnC(1)",	"M_lnPRestC(1)",	"M_lnKabsC(1)",	"M_lnKunabsC(1)",	"M_lnKbileC(1)",	"M_lnKurineC(1)",	"M_lnKbrnC(1)")
 tp_Mouse <-bayesplot::mcmc_trace(Mouse_x2 [,,], pars = pars_Pop)
 dp_Mouse <-bayesplot::mcmc_dens_overlay(Mouse_x2 [,,],  pars = pars_Pop)
-ggplot2::ggsave(filename = "plots/suppl/Figure_S1_traceplot_Mouse.eps", 
+ggplot2::ggsave(filename = "plots/suppl/Figure_S2_traceplot_Mouse.eps", 
                 plot = tp_Mouse, 
                 device = cairo_ps, 
                 dpi = 1200, 
@@ -62,7 +62,7 @@ ggplot2::ggsave(filename = "plots/suppl/Figure_S1_traceplot_Mouse.eps",
                 height = 10, 
                 units = "cm")
 
-ggplot2::ggsave(filename = "plots/suppl/Figure_S4_density_Mouse.eps", 
+ggplot2::ggsave(filename = "plots/suppl/Figure_S5_density_Mouse.eps", 
                 plot = dp_Mouse, 
                 device = cairo_ps, 
                 dpi = 1200, 
@@ -123,7 +123,7 @@ Mouse_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
   `colnames<-`(Parameter[1:9])  %>% 
   GGally:: ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha = TRUE) +
   theme_minimal() + labs(title = "Mouse") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
-ggsave("plots/suppl/Figure_S7_Correlation_matrix_Mouse.pdf", dpi = 1200, height = 10, width = 15, units="in")
+ggsave("plots/suppl/Figure_S8_Correlation_matrix_Mouse.jpg", dpi = 600, height = 10, width = 15, units="in")
 ```
 
 ```{r, include=FALSE}
