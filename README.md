@@ -11,32 +11,32 @@ The readers can directly duplicate the current results in a time manner using th
 organized in a stepwise fashion that the readers can easily duplicate the current work. Using human as an example:
 
 “1_calibration_Human.R” (Step 1):  
-The output of this R code script provides the results of model fitting to human calibration data (Figure 3C). 
+The output of this R code script provides the results of model fitting to human calibration data (Figure 2C). 
 
 2_MCMC_diagnosis_Human.RMD (Step 2):  
 The output of this R code script provides the results of post-MCMC diagnosis tests, including: 
-(a) Posterior distribution of population human model scaling parameters (Supplemental Table S6). The PBPK model parameters were updated (Table 3) using 
-these updated "scaling parameters" by taking antilogarithm (exponentiation) transformation [e.g., Kabsc = exp (lnKabsC)] (Supplemental Table S4-S6 for mouse, 
+(a) Posterior distribution of population human model scaling parameters (Supplemental Table S7). The PBPK model parameters were updated (Table 2) using 
+these updated "scaling parameters" by taking antilogarithm (exponentiation) transformation [e.g., Kabsc = exp (lnKabsC)] (Supplemental Table S5-S7 for mouse, 
 rat and human, respectively).
 
-(b) Posterior distributions for human model residual errors (Supplemental Table S9)
+(b) Posterior distributions for human model residual errors (Supplemental Table S10)
 
 (c) Traces plot of iHg-specific population parameters in humans including the estimated value of Brooks-Gelman Multivariate Shrink Factors (MPSRF) 
-(Supplemental Figure S3)
+(Supplemental Figure S4)
 
-(d) Probability density function plots of IHG-specific population parameters for humans (Supplemental Figure S6)
+(d) Probability density function plots of IHG-specific population parameters for humans (Supplemental Figure S7)
 
-(e) Correlation matrix of population metabolism-related parameters for humans (Supplemental Figure S9)
+(e) Correlation matrix of population metabolism-related parameters for humans (Supplemental Figure S10)
 
 3_validation_MAP_Human3.R (Step 3):  
 The output of this R code script provides the results of model fitting to human validation data. Once the validation process for all three species is 
-completed (mouse, rat and human), one can run the script code of “3_validation_All” to compile the results (Figure 4). 
+completed (mouse, rat and human), one can run the script code of “3_validation_All” to compile the results (Figure 3). 
 
 4_ 4_gsa_all.R (Step 4):  
-The output of this R code script provides the results of parameter sensitivity analysis for iHg-specific parameters (Figure 5).
+The output of this R code script provides the results of parameter sensitivity analysis for iHg-specific parameters (Supplemental Figure S11).
 
 5_HED_Mouse.R and 5_HED_Rat.R (Step 5):
-The output of these two R code scripts provide the results of estimated human equivalent dose (HED) based on mouse and rat models, respectively (Table 4). 
+The output of these two R code scripts provide the results of estimated human equivalent dose (HED) based on mouse and rat models, respectively (Table 3). 
 
 **MCMC replication** (optional):
 !!!Note!!! The readers can skip this folder and can still duplicate the current work by using the already generated outputs provided by the authors as 
