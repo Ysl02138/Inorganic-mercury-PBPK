@@ -7,7 +7,7 @@ details), but this is optional as the readers can still directly reduplicate the
 All data will be publicly released after the paper published. The details and data pipelines are included in:
 
 **codes**: 
-The readers can directly duplicate the current results in a time manner using the generated MCMC outputs by the authors. The R source codes were 
+The readers can directly duplicate the current results in a time manner using the generated MCMC outputs by the authors. The R source codes are 
 organized in a stepwise fashion that the readers can easily duplicate the current work. Using human as an example:
 
 “1_calibration_Human.R” (Step 1):  
