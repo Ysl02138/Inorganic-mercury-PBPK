@@ -1,7 +1,7 @@
 
 README Supplementary material for Lin et al. Inorganic Mercury Salts PBPK model
 
-=========================================
+========================================
 
 **Overview:**  
 The supplementary data include R code (in the folder of **codes**) and datasets (the folder of **datasets**) that can reproduce the modeling and analysis results (in the folder of **outputs**) and visualize plots (in the **plots** folder).  Also, the readers can re-run the whole MCMC analysis (optional) as detailed below.
