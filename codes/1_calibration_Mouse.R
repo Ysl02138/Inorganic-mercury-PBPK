@@ -74,8 +74,9 @@ if (!file.exists("mcsim.iHgMouseBW.model.exe")) {
 }
 for (iter in seq(dim(sample_Mouse_mcmc)[1])){
   head(sample_Mouse_mcmc, iter) |> tail(1) |>
-  write.table(file = "MCMC.Mousecheck.dat", row.names = FALSE, sep = "\t")
-  vld <- "./mcsim.iHgMouseBW.model.exe MCSim/iHgMouse.MCMC.check.in"
+    write.table(file = "MCMC.Mousecheck.dat", row.names = FALSE, sep = "\t")
+  vld <- "./mcsim.iHgMouseBW.model.exe MCSim/iHg_calibration_Hierachical_Mouse.in"
+  # This is posterior prediction check for calibration data using the hierarchical model framework 
   system(vld)
   out <- read.delim("MCMC.Mousecheck.out")
   out$iter <- iter
@@ -83,8 +84,6 @@ for (iter in seq(dim(sample_Mouse_mcmc)[1])){
   else Mouse_xx <- rbind(Mouse_xx, out)
 }
 Mouse_xx$Output_Var |> unique()
-
-
 
 # output manipulate
 Mouse_xx <- Mouse_xx |>
@@ -242,6 +241,6 @@ plot_grid(
     xlab, nrow = 3, rel_heights = c(0.05, 1, 0.05)),
   nrow = 1, rel_widths = c(0.02, 1)
 )
-ggsave(file = "plots/Figure_2A_calibration_Mouse.jpg", height = 12, width = 20, dpi = 600)
+ggsave(file = "plots/Figure_2A_calibration_Mouse.eps", device = cairo_ps, height = 12, width = 20, dpi = 600)
 dev.off()
 

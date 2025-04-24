@@ -53,7 +53,7 @@ dimnames(Human_x)[[3]] <- names(data[[1]])
 dim(Human_x)
 
 # Save to RData
-Human_mcmc <- Human_x[seq(50001, 100000, 1), , ]
+Human_mcmc <- Human_x[seq(150001, 300000, 1), , ]
 save(Human_mcmc, file = "outputs/iHg_Human_mcmc.RData")
 
 # data manipulate (random sample 125 iterations from 4 chains)
@@ -73,8 +73,9 @@ if (!file.exists("mcsim.iHgHumanBW.model.exe")) {
 }
 for (iter in seq(dim(sample_Human_mcmc)[1])){
   head(sample_Human_mcmc, iter) |> tail(1) |>
-  write.table(file = "MCMC.Humancheck.dat", row.names = FALSE, sep = "\t")
-  vld <- "./mcsim.iHgHumanBW.model.exe MCSim/iHgHuman.MCMC.check.in"
+    write.table(file = "MCMC.Humancheck.dat", row.names = FALSE, sep = "\t")
+  vld <- "./mcsim.iHgHumanBW.model.exe MCSim/iHg_calibration_Hierachical_Human.in"
+  # This is posterior prediction check for calibration data using the hierarchical model framework 
   system(vld)
   out <- read.delim("MCMC.Humancheck.out")
   out$iter <- iter
@@ -82,6 +83,7 @@ for (iter in seq(dim(sample_Human_mcmc)[1])){
   else Human_xx <- rbind(Human_xx, out)
 }
 Human_xx$Output_Var |> unique()
+
 
 # output manipulate
 Human_xx <- Human_xx |>
@@ -119,7 +121,7 @@ p1median <- Human_xx |>
 p1 <- Human_xx |> filter(Simulation == 1 & Time > 0) |>
   ggplot() +
   scale_y_log10(lim = c(10^-4, 10^1),
-                breaks = trans_breaks("log10", function(x) 10^x, n = 4),
+                breaks = trans_breaks("log10", function(x) 10^x, n = 3),
                 labels = trans_format("log10", scales::math_format(10^.x))) +
   geom_line(aes(x = Time, y = Prediction, group = iter), color = "grey") +
   geom_line(data = p1median, aes(Time, median), color = "black") +
@@ -135,8 +137,8 @@ p2median <- Human_xx |>
             UCL = quantile(Prediction, 0.95), LCL = quantile(Prediction, 0.05)) 
 p2 <- Human_xx |> filter(Simulation == 2 & Time > 0) |>
   ggplot() +
-  scale_y_log10(lim = c(10^-3, 10^2),
-                breaks = trans_breaks("log10", function(x) 10^x, n = 2),
+  scale_y_log10(lim = c(10^-3, 10^1.5),
+                breaks = trans_breaks("log10", function(x) 10^x, n = 4),
                 labels = trans_format("log10", scales::math_format(10^.x))) +
   geom_line(aes(x = Time, y = Prediction, group = iter), color = "grey") +
   geom_line(data = p2median, aes(Time, median), color = "black") +
@@ -185,7 +187,7 @@ plot_grid(
   ),
   nrow = 1, rel_widths = c(0.02, 1)
 )
-ggsave(file = "plots/Figure_2C_calibration_Human.jpg", height = 6, width = 18, dpi = 600)
+ggsave(file = "plots/Figure_2C_calibration_Human.eps", device = cairo_ps, height = 12, width = 20, dpi = 600)
 dev.off()
 
 

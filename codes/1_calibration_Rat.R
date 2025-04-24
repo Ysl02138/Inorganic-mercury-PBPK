@@ -77,7 +77,8 @@ if (!file.exists("mcsim.iHgRatBW.model.exe")) {
 for (iter in seq(dim(sample_Rat_mcmc)[1])){
   head(sample_Rat_mcmc, iter) |> tail(1) |>
   write.table(file = "MCMC.Ratcheck.dat", row.names = FALSE, sep = "\t")
-  vld <- "./mcsim.iHgRatBW.model.exe MCSim/iHgRat.MCMC.check.in"
+  vld <- "./mcsim.iHgRatBW.model.exe MCSim/iHg_calibration_Hierachical_Rat.in"
+  # This is posterior prediction check for calibration data using the hierarchical model framework 
   system(vld)
   out <- read.delim("MCMC.Ratcheck.out")
   out$iter <- iter
@@ -130,8 +131,8 @@ p1median <- Rat_xx |>
             UCL = quantile(Prediction, 0.975), LCL = quantile(Prediction, 0.025)) 
 p1 <- Rat_xx |> filter(Simulation == 1 & Time > 0) |>
   ggplot() +
-  scale_y_log10(lim = c(10^-3, 10^2),
-                breaks = trans_breaks("log10", function(x) 10^x, n = 5),
+  scale_y_log10(lim = c(10^-1, 10^2),
+                breaks = trans_breaks("log10", function(x) 10^x, n = 4),
                 labels = trans_format("log10", scales::math_format(10^.x))) +
   geom_line(aes(x = Time, y = Prediction, group = iter), color = "grey") +
   geom_line(data = p1median, aes(Time, median), color = "black") +
@@ -147,7 +148,7 @@ p2median <- Rat_xx |>
             UCL = quantile(Prediction, 0.975), LCL = quantile(Prediction, 0.025)) 
 p2 <- Rat_xx |> filter(Simulation == 2 & Time > 0) |>
   ggplot() +
-  scale_y_log10(lim = c(10^-4, 10^2),
+  scale_y_log10(lim = c(10^-3, 10^0),
                 breaks = trans_breaks("log10", function(x) 10^x, n = 4),
                 labels = trans_format("log10", scales::math_format(10^.x))) +
   geom_line(aes(x = Time, y = Prediction, group = iter), color = "grey") +
@@ -182,8 +183,8 @@ p4median <- Rat_xx |>
             UCL = quantile(Prediction, 0.975), LCL = quantile(Prediction, 0.025)) 
 p4 <- Rat_xx |> filter(Simulation %in% c(6:8) & Time > 0) |>
   ggplot() +
-  scale_y_log10(lim = c(10^-4, 10^3),
-                breaks = trans_breaks("log10", function(x) 10^x, n = 5),
+  scale_y_log10(lim = c(10^-3, 10^3),
+                breaks = trans_breaks("log10", function(x) 10^x, n = 3),
                 labels = trans_format("log10", scales::math_format(10^.x))) +
   geom_line(aes(x = Time, y = Prediction, group = iter), color = "grey") +
   geom_line(data = p4median, aes(Time, median), color = "black") +
@@ -243,6 +244,7 @@ plot_grid(
     xlab, nrow = 3, rel_heights = c(0.05, 1, 0.05)),
   nrow = 1, rel_widths = c(0.02, 1)
 )
-ggsave(file = "plots/Figure_2B_calibration_Rat.jpg", height = 12, width = 20, dpi = 600)
+
+ggsave(file = "plots/Figure_2B_calibration_Rat.eps", device = cairo_ps, height = 12, width = 20, dpi = 600)
 dev.off()
 
