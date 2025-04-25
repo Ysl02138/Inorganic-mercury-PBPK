@@ -1,7 +1,7 @@
 # ---
-# title: "iHg - Markov chain Monte Carlo Calibration Diagnosis"
+# title: "iHg - Markov chain Monte Carlo Calibration Diagnosis for human"
 # author: "YS Lin and NH Hsieh" 
-# date: "2023/02/05 (update: `r Sys.Date()`)"
+# date: "2023/04/01 (update: `r Sys.Date()`)"
 # output: 
 #  html_document:
 # fig_caption: yes  
@@ -36,6 +36,7 @@ theme_set(theme_bw())
 ```
 
 # traceplot and density diagnosis (every 10th sample from last half of MCMMC runs #############
+# This section will produce Supplemental Figure S4 and Figure S7
 ```{r, eval=F}
 Humanjob1 <- fread("outputs/iHgHuman_4880.out")|> as.data.frame()
 Humanjob2 <- fread("outputs/iHgHuman_3365.out")|> as.data.frame()
@@ -70,14 +71,23 @@ ggplot2::ggsave(filename = "plots/suppl/Figure_S7_density_Human.eps",
                 units = "cm")
 ```
 
-# Andrew Gelman Scale Reduction Factor
+# ---
+# Andrew Gelman Scale Reduction Factor**  
+# This section produces results for the posterior distributions shown in Supplemental Tables S7 and S10.  
+#  
+# From Supplemental Table S7, one can exponentiate each scaling coefficient parameter to obtain the posterior estimate as presented in Table 
+# (e.g., exp(lnPLC) = exp(2.375) = 10.8, where PLC is the liver:blood partition coefficient for human).  
+#  
+# For Supplemental Table S10, the residual error geometric standard deviation was estimated as the exponential of 
+# the square root of the error term (e.g., for "Ve_Aurine," representing urine).
+# ---
 ```{r}
 Humanmonitor <-monitor(Human_x, digits=4, probs = c(0.025, 0.5, 0.975), warmup = floor(dim(Human_x)[1]/2))
 print(Humanmonitor)
 dim(Human_x)
 ```
-
-#  MPSRF
+# MPSRF
+# This section will produce MPSRF values for Supplemental Figure S4 traceplot
 ```{r}
 Humanjob1 = as.mcmc(fread("outputs/iHgHuman_4880.out") |> as.data.frame(), header=T) 
 Humanjob2 = as.mcmc(fread("outputs/iHgHuman_3365.out") |> as.data.frame(), header=T) 
@@ -92,7 +102,9 @@ x4Human <- Humanjob4[,2:39  , drop=FALSE]
 combined = mcmc.list(x1Human,x2Human,x3Human,x4Human) 
 gelman.diag(combined, autoburnin=TRUE, multivariate=TRUE)
 ```
+
 # Correlation matrix of population posterior iHg-specific parameters 
+# This section will produce Supplemental Figure S10 plot
 ```{r}
 sim1.1 <- fread("outputs/iHgHuman_3365.out") 
 sim2.1 <- fread("outputs/iHgHuman_4880.out") 
@@ -123,6 +135,88 @@ Human_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
   GGally::  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha = TRUE) +
   theme_minimal() + labs(title = "Human") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
 ggsave("plots/suppl/Figure_S10_Correlation_matrix_Human.jpg", dpi = 600, height = 10, width = 15, units="in")
+```
+#
+#
+# ------------------------------------------------------------------------
+#  The following shows study-level posterior iHg-specific parameters for rats 
+# ------------------------------------------------------------------------
+#
+#
+# Correlation matrix of study-level posterior iHg-specific parameter ---- Hall 1995
+# For Hall 1995, exposure scenario is a single IV dose of 0.025 ug Hg/kg/d for humans. 
+# This study is labeled as Study 1.1, as it is listed as the first study in the human analysis. 
+# See the MCMC input file in the "MCMC replication" folder for details  (e.g., iHgHuman_3365.in for details)
+#
+
+```{r}
+sim1.1 <- fread("outputs/iHgHuman_3365.out") 
+sim2.1 <- fread("outputs/iHgHuman_4880.out") 
+sim3.1 <- fread("outputs/iHgHuman_5916.out") 
+sim4.1 <- fread("outputs/iHgHuman_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Human_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Human_corr)
+
+pars_name <- dimnames(Human_corr)[[3]]
+str <- which(pars_name == "lnPLC(1.1)")
+end <- which(pars_name == "lnKbrnC(1.1)")
+j <- c(str:end) 
+M_pars <- pars_name[str:end]
+sample_x <- seq(150001, 300000, 10)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Human_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  GGally::  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha = TRUE) +
+  theme_minimal() + labs(title = "Human") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Human_Correlation_Rothstein_1960.jpg", dpi = 600, height = 10, width = 15, units="in")
+```
+
+# Correlation matrix of study-level posterior iHg-specific parameter ---- Rahola 1973
+# For Rahola 1973, exposure scenario is a single oral of 0.09375 ug Hg/kg for humans.
+# This study is labeled as Study 1.2, as it is listed as the second study in the human analysis. 
+# See the MCMC input file in the "MCMC replication" folder for details  (e.g., iHgHuman_3365.in for details)
+#
+
+```{r}
+sim1.1 <- fread("outputs/iHgHuman_3365.out") 
+sim2.1 <- fread("outputs/iHgHuman_4880.out") 
+sim3.1 <- fread("outputs/iHgHuman_5916.out") 
+sim4.1 <- fread("outputs/iHgHuman_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Human_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Human_corr)
+
+pars_name <- dimnames(Human_corr)[[3]]
+str <- which(pars_name == "lnPLC(1.2)")
+end <- which(pars_name == "lnKbrnC(1.2)")
+j <- c(str:end) 
+M_pars <- pars_name[str:end]
+sample_x <- seq(150001, 300000, 10)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Human_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  GGally::  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha = TRUE) +
+  theme_minimal() + labs(title = "Human") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Human_Correlation_Rahola_1973.jpg", dpi = 600, height = 10, width = 15, units="in")
 ```
 
 ```{r, include=FALSE}

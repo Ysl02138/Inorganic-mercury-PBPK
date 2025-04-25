@@ -1,7 +1,7 @@
 # ---
-# title: "iHg - Markov chain Monte Carlo Calibration Diagnosis"
+# title: "iHg - Markov chain Monte Carlo Calibration Diagnosis for rat"
 # author: "YS Lin and NH Hsieh" 
-# date: "2023/02/05 (update: `r Sys.Date()`)"
+# date: "2023/04/01 (update: `r Sys.Date()`)"
 # output: 
 #  html_document:
 # fig_caption: yes  
@@ -36,7 +36,8 @@ library(ggcorrplot, quietly=T)
 theme_set(theme_bw())
 ```
 
-# This section will produce Supplemental Figure S2 and Figure S5
+# traceplot and density diagnosis (every 10th sample from last half of MCMMC runs #############
+# This section will produce Supplemental Figure S3 and Figure S6
 ```{r, eval=F}
 Ratjob1 <- fread("outputs/iHgRat_4880.out")|> as.data.frame()
 Ratjob2 <- fread("outputs/iHgRat_3365.out")|> as.data.frame()
@@ -71,14 +72,16 @@ ggplot2::ggsave(filename = "plots/suppl/Figure_S6_density_Rat.eps",
                 units = "cm")
 ```
 
-# Andrew Gelman Scale Reduction Factor
-# This section will produce results for posterior distributions for Supplemental Table S5 and S8
-#
-# From Supplemenal Table S5, one can take ant-log for each scaling coefficient parameter represents the posterior estimate as shown 
-# in Table 3 (e.g., exp(lnPLC) = exp (1.753) = 5.77 (PLC), the liver: blood coefficient for rat).  
-#
-# For Supplemental Table S8, rResidual error geometric standard deviation was calculated as exponential form of the square root of the error term 
-# (e.g., “Ve_Aurine” for urine) 
+# ---
+# Andrew Gelman Scale Reduction Factor**  
+# This section produces results for the posterior distributions shown in Supplemental Tables S6 and S9.  
+#  
+# From Supplemental Table S6, one can exponentiate each scaling coefficient parameter to obtain the posterior estimate as presented in Table 
+# (e.g., exp(lnPLC) = exp(1.753) = 7.99, where PLC is the liver:blood partition coefficient for rat).  
+#  
+# For Supplemental Table S9, the residual error geometric standard deviation was estimated as the exponential of 
+# the square root of the error term (e.g., for "Ve_Aurine," representing urine).
+# ---
 ```{r}
 Ratmonitor <-monitor(Rat_x, digits=4, probs = c(0.025, 0.5, 0.975), warmup = floor(dim(Rat_x)[1]/2))
 print(Ratmonitor)
@@ -86,7 +89,7 @@ dim(Rat_x)
 ```
 
 # MPSRF
-# This section will produce MPSRF values for Supplemental Figure S2 traceplot
+# This section will produce MPSRF values for Supplemental Figure S3 traceplot
 ```{r}
 Ratjob1 = as.mcmc(fread("outputs/iHgRat_4880.out") |> as.data.frame(), header=T) 
 Ratjob2 = as.mcmc(fread("outputs/iHgRat_3365.out") |> as.data.frame(), header=T) 
@@ -103,7 +106,7 @@ gelman.diag(combined, autoburnin=TRUE, multivariate=TRUE)
 ```
 
 # Correlation matrix of population posterior iHg-specific parameters 
-# For Supplemental Figure S8  
+# This section will produce Supplemental Figure S9 plot
 ```{r}
 sim1.1 <- fread("outputs/iHgRat_3365.out") 
 sim2.1 <- fread("outputs/iHgRat_4880.out") 
@@ -135,6 +138,165 @@ Rat_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
   theme_minimal() + labs(title = "Rat") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
 ggsave("plots/suppl/Figure_S9_Correlation_matrix_Rat.jpg", dpi = 600, height = 10, width = 15, units="in")
 ```
+#
+#
+# ------------------------------------------------------------------------
+#  The following shows study-level posterior iHg-specific parameters for rats 
+# ------------------------------------------------------------------------
+#
+#
+# Correlation matrix of study-level posterior iHg-specific parameter ---- Rothstein 1960
+# For Rothstein 1960, exposure scenario is a single IV dose of 250 ug Hg/kg for rats. 
+# This study is labeled as Study 1.1, as it is listed as the first study in the rat analysis. 
+# See the MCMC input file in the "MCMC replication" folder for details (e.g., iHgRat_3365.in).
+#
+
+```{r}
+sim1.1 <- fread("outputs/iHgRat_3365.out") 
+sim2.1 <- fread("outputs/iHgRat_4880.out") 
+sim3.1 <- fread("outputs/iHgRat_5916.out") 
+sim4.1 <- fread("outputs/iHgRat_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Rat_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Rat_corr)
+
+pars_name <- dimnames(Rat_corr)[[3]]
+str <- which(pars_name == "lnPLC(1.1)")
+end <- which(pars_name == "lnKbrnC(1.1)")
+M_pars <- pars_name[str:end]
+sample_x <- seq(50001, 100000, 10)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Rat_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  # GGally::
+  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha=T) +
+  theme_minimal() + labs(title = "Rat") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Rat_Correlation_Rothstein_1960.jpg", dpi = 600, height = 10, width = 15, units="in")
+```
+#
+# Correlation matrix of study-level posterior iHg-specific parameter ---- Oriquat 2013
+# For Oriquat 2013, exposure scenario is a twice weekly of 2770 ug Hg/kg for rats. 
+# This study is labeled as Study 1.2, as it is listed as the second study in the rat analysis. 
+# See the MCMC input file in the "MCMC replication" folder for details (e.g., iHgRat_3365.in).
+#
+
+```{r}
+sim1.1 <- fread("outputs/iHgRat_3365.out") 
+sim2.1 <- fread("outputs/iHgRat_4880.out") 
+sim3.1 <- fread("outputs/iHgRat_5916.out") 
+sim4.1 <- fread("outputs/iHgRat_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Rat_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Rat_corr)
+
+pars_name <- dimnames(Rat_corr)[[3]]
+str <- which(pars_name == "lnPLC(1.2)")
+end <- which(pars_name == "lnKbrnC(1.2)")
+M_pars <- pars_name[str:end]
+sample_x <- seq(50001, 100000, 10)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Rat_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  # GGally::
+  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha=T) +
+  theme_minimal() + labs(title = "Rat") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Rat_Correlation_Oriquat_2013.jpg", dpi = 600, height = 10, width = 15, units="in")
+```
+#
+# Correlation matrix of study-level posterior iHg-specific parameter ---- Morcillo 1995
+# For Morcillo 1995, exposure scenario is daily drinking water of 100-7200 ug/kg/day for rats. 
+# This study is labeled as Study 1.3, as it is listed as the third study in the rat analysis. 
+# See the MCMC input file in the "MCMC replication" folder for details (e.g., iHgRat_3365.in).
+#
+
+```{r}
+sim1.1 <- fread("outputs/iHgRat_3365.out") 
+sim2.1 <- fread("outputs/iHgRat_4880.out") 
+sim3.1 <- fread("outputs/iHgRat_5916.out") 
+sim4.1 <- fread("outputs/iHgRat_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Rat_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Rat_corr)
+
+pars_name <- dimnames(Rat_corr)[[3]]
+str <- which(pars_name == "lnPLC(1.3)")
+end <- which(pars_name == "lnKbrnC(1.3)")
+M_pars <- pars_name[str:end]
+sample_x <- seq(50001, 100000, 10)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Rat_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  # GGally::
+  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha=T) +
+  theme_minimal() + labs(title = "Rat") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Rat_Correlation_Morcillo_1995.jpg", dpi = 600, height = 10, width = 15, units="in")
+```
+#
+# Correlation matrix of study-level posterior iHg-specific parameter ---- NTP 1993
+# For NTP 1993, exposure scenario is daily gavage of 230-3,695 ug/kg/day for rats. 
+# This study is labeled as Study 1.4, as it is listed as the fourth study in the rat analysis. 
+# See the MCMC input file in the "MCMC replication" folder for details (e.g., iHgRat_3365.in).
+#
+
+```{r}
+sim1.1 <- fread("outputs/iHgRat_3365.out") 
+sim2.1 <- fread("outputs/iHgRat_4880.out") 
+sim3.1 <- fread("outputs/iHgRat_5916.out") 
+sim4.1 <- fread("outputs/iHgRat_6734.out") 
+
+SIM1 <- do.call(rbind, list(sim1.1))
+SIM2 <- do.call(rbind, list(sim2.1))
+SIM3 <- do.call(rbind, list(sim3.1))
+SIM4 <- do.call(rbind, list(sim4.1))
+
+Rat_corr <-mcmc_array(list(SIM1, SIM2, SIM3, SIM4))
+#dim(Rat_corr)
+
+pars_name <- dimnames(Rat_corr)[[3]]
+str <- which(pars_name == "lnPLC(1.4)")
+end <- which(pars_name == "lnKbrnC(1.4)")
+M_pars <- pars_name[str:end]
+sample_x <- seq(50001, 100000, 10)
+Parameter <- c(M_pars) %>%
+  strsplit(split =  "\\(1\\)") %>% unlist()
+# Correlation matrix
+sum_chains <- length(j)*4
+
+Rat_corr[j,,M_pars] %>% matrix(nrow = sum_chains) %>%
+  `colnames<-`(Parameter[1:9])  %>% 
+  # GGally::
+  ggcorr(nbreaks = 5, label = T, label_size = 4, label_round = 2, size = 4, label_alpha=T) +
+  theme_minimal() + labs(title = "Rat") + theme(plot.title = element_text(size=24, hjust = 0.5)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank(), title = element_blank()) +   theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+ggsave("plots/suppl/Rat_Correlation_NTP_1993.jpg", dpi = 600, height = 10, width = 15, units="in")
+```
+
 
 ```{r, include=FALSE}
 clear()
