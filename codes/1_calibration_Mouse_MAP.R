@@ -492,7 +492,7 @@ p4 <-   ggplot() +
 # add the title and axis label
 title <- ggdraw() +
   draw_label(
-    "Mouse: Population model fit to calibration data",
+    "Figure S11 (Mouse calibration under the population model)",
     fontface = "plain", #bold
     x = 0,
     size = 15,

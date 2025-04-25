@@ -151,7 +151,7 @@ p2 <- Human_xx |> filter(Simulation == 2 & Time > 0) |>
 title <- ggdraw() +
   draw_label(
     "
-    Figure 3C (Human calibration)
+    Figure 2C (Human calibration under the hierarchical model)
     ",
     fontface = "plain", #bold
     x = 0,

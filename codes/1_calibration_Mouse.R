@@ -198,7 +198,7 @@ p4 <- Mouse_xx |>
 title <- ggdraw() +
   draw_label(
     "
-    Figure 3A (Mouse calibration)
+    Figure 2A (Mouse calibration under the hierarchical model)
     ",
     fontface = "plain", #bold
     x = 0,

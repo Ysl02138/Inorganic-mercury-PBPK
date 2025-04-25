@@ -201,7 +201,7 @@ p4 <- Rat_xx |> filter(Simulation %in% c(6:8) & Time > 0) |>
 title <- ggdraw() +
   draw_label(
     "
-    Figure 3B (Rat calibration)
+    Figure 2B (Rat calibration under the hierarchical model)
     ",
     fontface = "plain", #bold
     x = 0,
