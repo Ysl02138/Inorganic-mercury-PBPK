@@ -4,7 +4,7 @@ README Supplementary material for Lin et al. Inorganic Mercury Salts PBPK model
 ========================================
 
 **Overview:**  
-The supplementary data include R code (in the folder of **codes**) and datasets (the folder of **datasets**) that can reproduce the modeling and analysis results (in the folder of **outputs**) and visualize plots (in the **plots** folder).  Also, the readers can re-run the whole MCMC analysis (optional) as detailed below.
+The supplementary data include R codes (in the folder of **codes**) and datasets (the folder of **datasets**) that can reproduce the modeling and analysis results (in the folder of **outputs**) and visualize plots (in the **plots** folder).  Also, the readers can re-run the whole MCMC analysis (optional) as detailed below.
 
 **Quick Start:**  
 The readers can directly duplicate the current results in a timely manner using the authors' generated MCMC outputs.  First, please execute the **“iHg.Rproj”** file under the parent directory to set up the correct folder/file path.  Once completed, the readers can execute the files under the folder of **codes** in a stepwise fashion to duplicate the current work (e.g., “1_calibration_Human.R”,  “2_MCMC_diagnosis_Human.Rmd”, and so on)  
