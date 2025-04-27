@@ -29,7 +29,7 @@ Mouse_x <-mcmc_array(list(Mousesim1.1, Mousesim2.1, Mousesim3.1, Mousesim4.1))
 pars_name <- dimnames(Mouse_x)[[3]]
 
 str <- which(pars_name == "Ve_Aurine(1)")
-end <- which(pars_name == "lnKbrnC(1.4)")
+end <- which(pars_name == "V_lnKbrnC(1)")
 
 parms <- pars_name[str:end]
 

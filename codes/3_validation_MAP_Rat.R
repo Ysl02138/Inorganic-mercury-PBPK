@@ -29,7 +29,7 @@ Rat_x <-mcmc_array(list(Ratsim1.1, Ratsim2.1, Ratsim3.1, Ratsim4.1))
 pars_name <- dimnames(Rat_x)[[3]]
 
 str <- which(pars_name == "Ve_Aurine(1)")
-end <- which(pars_name == "lnKbrnC(1.4)")
+end <- which(pars_name == "V_lnKbrnC(1)")
 
 parms <- pars_name[str:end]
 

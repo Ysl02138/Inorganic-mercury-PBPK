@@ -33,7 +33,7 @@ parms <- pars_name[str:end]
 j <- seq(50001, 100000, 10) 
 sum_chains <- length(j)*4
 
-n = 100 # 100 virtual study
+n = 500 # 100 virtual study
 d <- Rat_x[j,,] %>% matrix(nrow = sum_chains) %>% as.data.frame() %>% 
   `colnames<-`(dimnames(Rat_x)[[3]])
 i <- which(d[,"LnPosterior"]==max(d[,"LnPosterior"])) %>%
@@ -71,7 +71,7 @@ parms <- pars_name[str:end]
 j <- seq(150001, 300000, 10) 
 sum_chains <- length(j)*4
 
-n = 100 # 100 virtual study
+n = 500 # 100 virtual study
 d <- Human_x[j,,] %>% matrix(nrow = sum_chains) %>% as.data.frame() %>% 
   `colnames<-`(dimnames(Human_x)[[3]])
 i <- which(d[,"LnPosterior"]==max(d[,"LnPosterior"])) %>%

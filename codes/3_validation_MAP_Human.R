@@ -29,7 +29,7 @@ Human_x <-mcmc_array(list(Humansim1.1, Humansim2.1, Humansim3.1, Humansim4.1))
 pars_name <- dimnames(Human_x)[[3]]
 
 str <- which(pars_name == "Ve_Aurine(1)")
-end <- which(pars_name == "lnKbrnC(1.2)")
+end <- which(pars_name == "V_lnKbrnC(1)")
 parms <- pars_name[str:end]
 
 j <- seq(150001, 300000, 1) 

@@ -272,7 +272,7 @@ p2 <- ggplot() +
 # add the title and axis label
 title <- ggdraw() +
   draw_label(
-    "Figure S13 (Mouse calibration under the population model)",
+    "Figure S13 (Human calibration under the population model)",
     fontface = "plain", #bold
     x = 0,
     size = 15,
