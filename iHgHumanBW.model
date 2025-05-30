@@ -66,8 +66,8 @@ Outputs = {
   
   VL,          # volume of  liver, L
   VK,          # volume of  kidney, L
-  VBrn,        # volume of  liver, L
-  VBld,        # volume of  kidney, L
+  VBrn,        # volume of  brain, L
+  VBld,        # volume of  blood, L
   VRest,       # volume of  carcass (rest of the body)
   
   Kabs,        # 1/hr, absorption
@@ -266,7 +266,7 @@ Dynamics {
   
    # Assign an initial value for each state.
    KGavage = (BW * PDose *   expowk * expodur) / TChng;   # PO dose rate (into GI) (ug/hr)
-   KDrink = (Drink * BW * expowk * expodur) / 24.0;       # Ingestion rate via drinking water (mg/hr) ## Oral route
+   KDrink = (Drink * BW * expowk * expodur) / 24.0;       # Ingestion rate via drinking water (ug/hr) ## Oral route
    KIV = (IVDose * BW * expowk * expodur) / TChng;        # IV infusion rate (ug/hr)
 
    # Gastrointestinal (GI) tract
